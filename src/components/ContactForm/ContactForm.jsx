@@ -1,24 +1,27 @@
-import { useState } from 'react';
 import { Button, Title } from 'styles/Shared.styles';
 import { Input, Label, Phonebook } from './ContactForm.styled';
+import { addContact, selectContacts } from '../../redux/contacts/slice';
+import { useDispatch, useSelector } from 'react-redux';
 
-export function ContactForm({ addContact }) {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-
-  const onInputChange = e => {
-    const value = e.target.value;
-
-    e.target.name === 'name' ? setName(value) : setNumber(value);
-  };
+export function ContactForm() {
+  const contacts = useSelector(selectContacts);
+  const dispatch = useDispatch();
 
   const onSubmit = e => {
     e.preventDefault();
+    const name = e.target.elements.name.value;
+    const number = e.target.elements.number.value;
 
-    addContact({ name, number });
+    if (
+      contacts.find(
+        contact => name.toLowerCase() === contact.name.toLowerCase()
+      )
+    ) {
+      return alert(`${name} is already in contacts`);
+    }
 
-    setName('');
-    setNumber('');
+    dispatch(addContact({ name, number }));
+    e.target.reset();
   };
 
   return (
@@ -27,23 +30,11 @@ export function ContactForm({ addContact }) {
       <Phonebook onSubmit={onSubmit}>
         <Label>
           Name
-          <Input
-            value={name}
-            onChange={onInputChange}
-            type="text"
-            name="name"
-            required
-          />
+          <Input type="text" name="name" required />
         </Label>
         <Label>
           Number
-          <Input
-            value={number}
-            onChange={onInputChange}
-            type="tel"
-            name="number"
-            required
-          />
+          <Input type="tel" name="number" required />
         </Label>
         <Button>Add contact</Button>
       </Phonebook>
